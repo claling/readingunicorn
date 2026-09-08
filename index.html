@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Word Wonders — A Kids' Dictionary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #5B3A73;
+    --sky: #FAF0FF;
+    --sun: #FFD6EE;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Quicksand', 'Nunito', sans-serif;
+    background: linear-gradient(180deg, #FDF3FF 0%, #F1F6FF 45%, #FFF6F0 100%);
+    color: var(--ink);
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 28px 20px 60px; position: relative; z-index: 1; }
+  .bg-deco {
+    position: fixed; pointer-events: none; z-index: 0; opacity: 0.55;
+    animation: float 7s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-16px) rotate(8deg); }
+  }
+  h1 { font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 34px; margin: 0; line-height: 1.1; }
+  .header { display: flex; align-items: center; gap: 16px; margin-bottom: 22px; }
+  .owl {
+    font-size: 44px; background: var(--sun); border: 3px solid var(--ink); border-radius: 24px;
+    width: 76px; height: 76px; display: flex; align-items: center; justify-content: center;
+    box-shadow: 4px 4px 0 var(--ink); flex-shrink: 0;
+  }
+  .subtitle { margin: 4px 0 0; font-size: 16px; font-weight: 600; color: #9B6FC9; }
+
+  .lookup-box {
+    background: #FFFFFF; border: 3px solid var(--ink); border-radius: 22px;
+    padding: 20px; margin-bottom: 26px; box-shadow: 5px 5px 0 var(--ink);
+  }
+  .lookup-title { font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 19px; margin: 0 0 4px; }
+  .lookup-hint { margin: 0 0 14px; font-size: 14px; color: #9B6FC9; font-weight: 600; }
+  .lookup-row { display: flex; gap: 10px; }
+  #lookupInput {
+    flex: 1; border: 2.5px solid #E4C6F5; border-radius: 999px; padding: 11px 18px;
+    font-size: 16px; font-weight: 600; font-family: inherit; outline: none; color: var(--ink);
+  }
+  #lookupInput:focus { border-color: var(--ink); }
+  #lookupBtn {
+    border: 2.5px solid var(--ink); background: var(--ink); color: #fff; font-family: inherit;
+    font-weight: 700; font-size: 15px; padding: 11px 22px; border-radius: 999px; cursor: pointer;
+  }
+  #lookupBtn:active { transform: scale(0.97); }
+  #lookupResult { margin-top: 16px; }
+  .lookup-loading { font-weight: 600; color: #9B6FC9; }
+  .lookup-error {
+    background: #FDE7EE; border: 2px solid #B23760; color: #82203F; font-weight: 700;
+    padding: 14px 16px; border-radius: 14px; font-size: 15px;
+  }
+  .entry-word-row { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .entry-word { font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 26px; margin: 0; }
+  .entry-phonetic { font-size: 15px; color: #9B6FC9; font-weight: 700; }
+  .speak-round {
+    width: 40px; height: 40px; border-radius: 50%; border: 2.5px solid var(--ink); background: #fff;
+    display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;
+  }
+  .speak-round.playing { background: var(--ink); }
+  .pos-tag {
+    display: inline-block; font-size: 12px; font-weight: 700; text-transform: lowercase;
+    background: #EEE9FB; color: #5B3FA6; padding: 3px 10px; border-radius: 999px; margin: 8px 0 6px;
+  }
+  .def-item { font-size: 15px; font-weight: 600; margin: 4px 0; line-height: 1.5; }
+  .def-example { font-size: 14px; font-style: italic; color: #9B6FC9; font-weight: 600; margin: 2px 0 10px 18px; }
+  .simple-def { font-size: 17px; font-weight: 600; line-height: 1.55; margin: 6px 0 8px; }
+  .simple-example { font-size: 15px; font-style: italic; color: #9B6FC9; font-weight: 600; margin: 0 0 14px; }
+  .grownup-note {
+    font-size: 12px; color: #94A9B2; font-weight: 600; margin-top: 10px; padding-top: 10px;
+    border-top: 1px dashed #DCE9EE; line-height: 1.5;
+  }
+
+  .divider { display: flex; align-items: center; gap: 12px; margin: 30px 0 18px; }
+  .divider span { font-weight: 700; font-size: 14px; color: #9B6FC9; white-space: nowrap; }
+  .divider hr { flex: 1; border: none; border-top: 2px dashed #E4C6F5; }
+  .sparkle { display: inline-block; animation: twinkle 1.8s ease-in-out infinite; }
+  .sparkle.s2 { animation-delay: .4s; }
+  .sparkle.s3 { animation-delay: .9s; }
+  @keyframes twinkle { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .4; transform: scale(0.75); } }
+
+  .chip-row, .letter-row { display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px; }
+  .chip {
+    flex-shrink: 0; font-family: inherit; font-weight: 700; font-size: 14px; padding: 9px 16px;
+    border-radius: 999px; border: 2.5px solid #E4C6F5; background: #fff; color: var(--ink); cursor: pointer;
+  }
+  .chip.active { border-color: var(--chip-color, var(--ink)); background: var(--chip-color, var(--ink)); color: #fff; }
+  .letter-btn {
+    flex-shrink: 0; width: 36px; height: 36px; border-radius: 12px; font-family: 'Baloo 2', sans-serif;
+    font-weight: 700; font-size: 15px; border: 2.5px solid var(--ink); background: #fff; color: var(--ink); cursor: pointer;
+  }
+  .letter-btn.disabled { border-color: #F0DCFA; background: #FBF3FF; color: #D3B3E8; cursor: default; }
+  .letter-btn.active { background: var(--ink); color: #fff; }
+
+  .count-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .count-text { font-weight: 700; color: #9B6FC9; font-size: 15px; }
+  .clear-link { border: none; background: none; color: #B23760; font-weight: 700; font-size: 14px; cursor: pointer; font-family: inherit; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+  .card {
+    border-radius: 22px; padding: 18px; border-width: 3px; border-style: solid;
+    box-shadow: 4px 4px 0 var(--card-color);
+    border-color: var(--card-color); background: var(--card-bg);
+  }
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
+  .card-emoji { font-size: 40px; line-height: 1; }
+  .card-word { font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 24px; margin: 0 0 2px; color: var(--card-color); }
+  .card-syl { margin: 0 0 10px; font-size: 13px; font-weight: 700; letter-spacing: 0.3px; color: var(--card-color); opacity: 0.75; }
+  .card-def { margin: 0 0 8px; font-size: 15px; font-weight: 600; line-height: 1.45; }
+  .card-ex { margin: 0; font-size: 14px; font-style: italic; color: #9B6FC9; font-weight: 600; }
+
+  .empty {
+    text-align: center; padding: 48px 20px; background: #fff; border: 3px dashed #E4C6F5; border-radius: 24px;
+  }
+  .empty-emoji { font-size: 48px; margin-bottom: 8px; }
+  .empty-title { font-weight: 700; font-size: 18px; margin: 0; }
+  .empty-sub { color: #9B6FC9; font-weight: 600; margin-top: 6px; }
+
+  ::-webkit-scrollbar { height: 8px; }
+  ::-webkit-scrollbar-thumb { background: #E4C6F5; border-radius: 8px; }
+</style>
+</head>
+<body>
+<span class="bg-deco" style="top:8%; left:5%; font-size:26px; animation-delay:0s;">✨</span>
+<span class="bg-deco" style="top:18%; left:88%; font-size:22px; animation-delay:1.2s;">⭐</span>
+<span class="bg-deco" style="top:38%; left:3%; font-size:20px; animation-delay:2.1s;">🌟</span>
+<span class="bg-deco" style="top:55%; left:92%; font-size:26px; animation-delay:0.6s;">💫</span>
+<span class="bg-deco" style="top:72%; left:6%; font-size:22px; animation-delay:1.8s;">✨</span>
+<span class="bg-deco" style="top:85%; left:90%; font-size:20px; animation-delay:2.6s;">⭐</span>
+<span class="bg-deco" style="top:4%; left:45%; font-size:18px; animation-delay:1.4s;">🌟</span>
+<span class="bg-deco" style="top:95%; left:40%; font-size:22px; animation-delay:0.9s;">💫</span>
+<div class="wrap">
+  <div class="header">
+    <div class="owl">🦄</div>
+    <div>
+      <h1><span class="sparkle">✨</span> Word Wonders <span class="sparkle s2">✨</span></h1>
+      <p class="subtitle">Look up any magical word, or browse fun ones below! <span class="sparkle s3">🌈</span></p>
+    </div>
+  </div>
+
+  <div class="lookup-box">
+    <p class="lookup-title">🦄 Look up any word</p>
+    <p class="lookup-hint">Type a word from anywhere — a book, homework, or one you just heard! We'll explain it simply.</p>
+    <div class="lookup-row">
+      <input id="lookupInput" placeholder="e.g. 'enormous', 'volcano', 'giggle'..." />
+      <button id="lookupBtn">Look it up</button>
+    </div>
+    <div id="lookupResult"></div>
+  </div>
+
+  <div class="divider"><span>OR BROWSE FUN WORDS</span><hr /></div>
+
+  <div class="chip-row" id="chipRow"></div>
+  <div class="letter-row" id="letterRow"></div>
+
+  <div class="count-row">
+    <p class="count-text" id="countText"></p>
+    <button class="clear-link" id="clearBtn" style="display:none;">Clear filters</button>
+  </div>
+
+  <div id="gridWrap"></div>
+</div>
+
+<script>
+const WORDS = [
+  { w: "Elephant", syl: "el·e·phant", cat: "animals", emoji: "🐘", def: "A huge animal with big floppy ears and a long trunk for drinking and grabbing food.", ex: "The elephant sprayed water with its trunk." },
+  { w: "Lion", syl: "li·on", cat: "animals", emoji: "🦁", def: "A big wild cat with a fluffy mane, sometimes called the king of the jungle.", ex: "The lion let out a loud roar." },
+  { w: "Dog", syl: "dog", cat: "animals", emoji: "🐶", def: "A furry pet that barks, wags its tail, and loves to play fetch.", ex: "The dog wagged its tail happily." },
+  { w: "Butterfly", syl: "but·ter·fly", cat: "animals", emoji: "🦋", def: "A colorful insect with pretty wings that flutters from flower to flower.", ex: "A butterfly landed on the flower." },
+  { w: "Fish", syl: "fish", cat: "animals", emoji: "🐟", def: "An animal that lives in water and swims using fins.", ex: "The fish swam quickly away." },
+  { w: "Bird", syl: "bird", cat: "animals", emoji: "🐦", def: "An animal with feathers and wings that can fly through the sky.", ex: "The bird built a nest in the tree." },
+  { w: "Dinosaur", syl: "di·no·saur", cat: "animals", emoji: "🦕", def: "A giant animal that lived a very long time ago, before people existed.", ex: "The dinosaur skeleton at the museum was huge." },
+  { w: "Insect", syl: "in·sect", cat: "animals", emoji: "🐜", def: "A tiny animal with six legs, like an ant or a bee.", ex: "An insect crawled across the leaf." },
+  { w: "Happy", syl: "hap·py", cat: "feelings", emoji: "😊", def: "Feeling good, like when you get a present or see a friend.", ex: "She felt happy on her birthday." },
+  { w: "Sad", syl: "sad", cat: "feelings", emoji: "😢", def: "Feeling unhappy, like when you lose your favorite toy.", ex: "He was sad when his ice cream fell." },
+  { w: "Excited", syl: "ex·cit·ed", cat: "feelings", emoji: "🤩", def: "Feeling super happy and eager about something fun that's coming.", ex: "I'm excited for my birthday party!" },
+  { w: "Scared", syl: "scared", cat: "feelings", emoji: "😨", def: "Feeling afraid, like during a thunderstorm or a scary movie.", ex: "She was scared of the dark." },
+  { w: "Curious", syl: "cu·ri·ous", cat: "feelings", emoji: "🧐", def: "Wanting to know or learn more about something.", ex: "She was curious about how rainbows form." },
+  { w: "Furious", syl: "fu·ri·ous", cat: "feelings", emoji: "😡", def: "Feeling extremely angry.", ex: "He was furious when his tower of blocks fell." },
+  { w: "Brave", syl: "brave", cat: "feelings", emoji: "🦸", def: "Not afraid to do something hard or scary.", ex: "The firefighter was brave inside the burning building." },
+  { w: "Banana", syl: "ba·na·na", cat: "food", emoji: "🍌", def: "A curved yellow fruit that's soft and sweet on the inside.", ex: "He packed a banana for lunch." },
+  { w: "Apple", syl: "ap·ple", cat: "food", emoji: "🍎", def: "A round, crunchy fruit that can be red, green, or yellow.", ex: "An apple makes a great snack." },
+  { w: "Bread", syl: "bread", cat: "food", emoji: "🍞", def: "A soft food made by baking flour and water together.", ex: "We ate warm bread with butter." },
+  { w: "Cheese", syl: "cheese", cat: "food", emoji: "🧀", def: "A yellow or white food made from milk.", ex: "Mice in stories love to eat cheese." },
+  { w: "Cookie", syl: "cook·ie", cat: "food", emoji: "🍪", def: "A small, sweet treat that's baked in the oven.", ex: "Grandma baked chocolate chip cookies." },
+  { w: "Pizza", syl: "piz·za", cat: "food", emoji: "🍕", def: "A round baked food covered with cheese and tomato sauce.", ex: "We ordered pizza for dinner." },
+  { w: "Rainbow", syl: "rain·bow", cat: "nature", emoji: "🌈", def: "A colorful arc that appears in the sky after it rains.", ex: "We saw a rainbow after the storm." },
+  { w: "Mountain", syl: "moun·tain", cat: "nature", emoji: "⛰️", def: "A very tall hill made of rock that reaches up into the sky.", ex: "They climbed to the top of the mountain." },
+  { w: "Ocean", syl: "o·cean", cat: "nature", emoji: "🌊", def: "A huge body of salty water, bigger than any lake.", ex: "Dolphins swim and play in the ocean." },
+  { w: "Star", syl: "star", cat: "nature", emoji: "⭐", def: "A bright point of light you can see in the sky at night.", ex: "She made a wish upon a star." },
+  { w: "Cloud", syl: "cloud", cat: "nature", emoji: "☁️", def: "A soft, floating shape in the sky made of tiny water drops.", ex: "That cloud looks like a bunny!" },
+  { w: "Tree", syl: "tree", cat: "nature", emoji: "🌳", def: "A tall plant with a trunk, branches, and leaves.", ex: "Birds like to live in the tree." },
+  { w: "Volcano", syl: "vol·ca·no", cat: "nature", emoji: "🌋", def: "A mountain that can explode with hot melted rock called lava.", ex: "The volcano erupted with smoke and lava." },
+  { w: "Galaxy", syl: "gal·ax·y", cat: "nature", emoji: "🌌", def: "A huge group of stars, planets, and dust out in space.", ex: "Our galaxy is called the Milky Way." },
+  { w: "Planet", syl: "plan·et", cat: "nature", emoji: "🪐", def: "A giant round object in space that circles around a star.", ex: "Earth is the planet we live on." },
+  { w: "Jump", syl: "jump", cat: "actions", emoji: "🤸", def: "To push off the ground with your legs and go up in the air.", ex: "The frog can jump very high." },
+  { w: "Run", syl: "run", cat: "actions", emoji: "🏃", def: "To move very fast using your legs, faster than walking.", ex: "I like to run around the park." },
+  { w: "Sleep", syl: "sleep", cat: "actions", emoji: "😴", def: "To close your eyes and rest, usually at night.", ex: "Babies sleep for a lot of the day." },
+  { w: "Dance", syl: "dance", cat: "actions", emoji: "💃", def: "To move your body to the beat of music.", ex: "They love to dance at parties." },
+  { w: "Sing", syl: "sing", cat: "actions", emoji: "🎤", def: "To make music using your voice.", ex: "Birds sing outside every morning." },
+  { w: "Read", syl: "read", cat: "actions", emoji: "📖", def: "To look at written words and understand what they say.", ex: "I love to read before bed." },
+  { w: "Mom", syl: "mom", cat: "family", emoji: "👩", def: "A word for your mother.", ex: "Mom gives the very best hugs." },
+  { w: "Dad", syl: "dad", cat: "family", emoji: "👨", def: "A word for your father.", ex: "Dad reads me a story every night." },
+  { w: "Sister", syl: "sis·ter", cat: "family", emoji: "👧", def: "A girl who has the same parents as you.", ex: "My sister helps me with homework." },
+  { w: "Brother", syl: "broth·er", cat: "family", emoji: "👦", def: "A boy who has the same parents as you.", ex: "My brother taught me to ride a bike." },
+  { w: "Grandma", syl: "grand·ma", cat: "family", emoji: "👵", def: "A word for your mom's or dad's mother.", ex: "Grandma bakes the best cookies." },
+  { w: "Baby", syl: "ba·by", cat: "family", emoji: "👶", def: "A very young child who is just learning about the world.", ex: "The baby giggled at the puppy." },
+  { w: "Gravity", syl: "grav·i·ty", cat: "science", emoji: "🍎", def: "The invisible force that pulls things down toward the ground.", ex: "Gravity is why the apple fell from the tree." },
+  { w: "Robot", syl: "ro·bot", cat: "science", emoji: "🤖", def: "A machine that can be programmed to do jobs on its own.", ex: "The robot vacuumed the whole floor." },
+  { w: "Astronaut", syl: "as·tro·naut", cat: "science", emoji: "👩‍🚀", def: "A person who travels and works out in outer space.", ex: "The astronaut floated outside the spaceship." },
+  { w: "Fossil", syl: "fos·sil", cat: "science", emoji: "🦴", def: "The hardened remains of a plant or animal from long, long ago.", ex: "They found a dinosaur fossil in the rock." },
+  { w: "Enormous", syl: "e·nor·mous", cat: "science", emoji: "🐋", def: "Extremely, extremely big.", ex: "The whale was enormous, bigger than a bus." },
+  { w: "Treasure", syl: "treas·ure", cat: "adventure", emoji: "🏴‍☠️", def: "A collection of valuable things, like gold or jewels.", ex: "The pirates buried their treasure on the island." },
+  { w: "Castle", syl: "cas·tle", cat: "adventure", emoji: "🏰", def: "A huge old building with thick walls, built to protect the people inside.", ex: "The knight lived in a castle on the hill." },
+  { w: "Dragon", syl: "drag·on", cat: "adventure", emoji: "🐉", def: "A giant make-believe creature that can breathe fire and often has wings.", ex: "In the story, the dragon guarded the treasure." },
+  { w: "Compass", syl: "com·pass", cat: "adventure", emoji: "🧭", def: "A tool with a needle that always points north, used for finding your way.", ex: "The explorer used a compass to find the trail." },
+  { w: "Unicorn", syl: "u·ni·corn", cat: "adventure", emoji: "🦄", def: "A make-believe horse with one magic horn on its head.", ex: "In the story, the unicorn galloped across a rainbow." },
+  { w: "Sparkle", syl: "spar·kle", cat: "adventure", emoji: "✨", def: "A tiny flash of light that twinkles, like glitter or stars.", ex: "Her shoes had a sparkle every time she took a step." },
+];
+
+const CATS = [
+  { id: "all", label: "All words", color: "#5B3A73", bg: "#FAF0FF" },
+  { id: "animals", label: "Animals", color: "#1F8A5F", bg: "#DFF7EB" },
+  { id: "feelings", label: "Feelings", color: "#C23E7A", bg: "#FDE3F0" },
+  { id: "food", label: "Food", color: "#C97A1A", bg: "#FFF0D9" },
+  { id: "nature", label: "Nature", color: "#1F87A8", bg: "#DEF4FA" },
+  { id: "actions", label: "Actions", color: "#7A4BC7", bg: "#F0E7FC" },
+  { id: "family", label: "Family", color: "#C2542E", bg: "#FFE9DE" },
+  { id: "science", label: "Science", color: "#2C6FB0", bg: "#E1EEFA" },
+  { id: "adventure", label: "Adventure", color: "#B0862C", bg: "#FBF0D9" },
+];
+
+let query = "";
+let letter = null;
+let cat = "all";
+let speakingWord = null;
+
+function catMeta(id) { return CATS.find(c => c.id === id) || CATS[0]; }
+
+function speak(word, btn) {
+  if (!("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(word);
+  utter.rate = 0.75;
+  utter.pitch = 1.15;
+  document.querySelectorAll(".speak-round.playing").forEach(el => el.classList.remove("playing"));
+  utter.onstart = () => { if (btn) btn.classList.add("playing"); };
+  utter.onend = () => { if (btn) btn.classList.remove("playing"); };
+  utter.onerror = () => { if (btn) btn.classList.remove("playing"); };
+  window.speechSynthesis.speak(utter);
+}
+
+function renderChips() {
+  const row = document.getElementById("chipRow");
+  row.innerHTML = "";
+  CATS.forEach(c => {
+    const btn = document.createElement("button");
+    btn.className = "chip" + (cat === c.id ? " active" : "");
+    btn.style.setProperty("--chip-color", c.color);
+    btn.textContent = c.label;
+    btn.onclick = () => { cat = c.id; renderAll(); };
+    row.appendChild(btn);
+  });
+}
+
+function renderLetters() {
+  const row = document.getElementById("letterRow");
+  row.innerHTML = "";
+  const has = new Set(WORDS.map(w => w.w[0].toUpperCase()));
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach(l => {
+    const btn = document.createElement("button");
+    const enabled = has.has(l);
+    btn.className = "letter-btn" + (!enabled ? " disabled" : "") + (letter === l ? " active" : "");
+    btn.textContent = l;
+    if (enabled) btn.onclick = () => { letter = (letter === l ? null : l); renderAll(); };
+    row.appendChild(btn);
+  });
+}
+
+function renderGrid() {
+  const filtered = WORDS.filter(w => {
+    const mq = w.w.toLowerCase().includes(query.trim().toLowerCase());
+    const ml = !letter || w.w[0].toUpperCase() === letter;
+    const mc = cat === "all" || w.cat === cat;
+    return mq && ml && mc;
+  }).sort((a,b) => a.w.localeCompare(b.w));
+
+  document.getElementById("countText").textContent = `${filtered.length} ${filtered.length === 1 ? "word" : "words"} found`;
+  document.getElementById("clearBtn").style.display = (query || letter || cat !== "all") ? "inline" : "none";
+
+  const wrap = document.getElementById("gridWrap");
+  if (filtered.length === 0) {
+    wrap.innerHTML = `<div class="empty"><div class="empty-emoji">🔍</div><p class="empty-title">No words found yet!</p><p class="empty-sub">Try a different letter, or use the lookup box above.</p></div>`;
+    return;
+  }
+  wrap.innerHTML = `<div class="grid">${filtered.map(item => {
+    const meta = catMeta(item.cat);
+    return `<div class="card" style="--card-color:${meta.color}; --card-bg:${meta.bg}">
+      <div class="card-top">
+        <div class="card-emoji">${item.emoji}</div>
+        <button class="speak-round" data-word="${item.w}" aria-label="Hear ${item.w}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${meta.color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+        </button>
+      </div>
+      <h3 class="card-word" style="color:${meta.color}">${item.w}</h3>
+      <p class="card-syl" style="color:${meta.color}">${item.syl}</p>
+      <p class="card-def">${item.def}</p>
+      <p class="card-ex">"${item.ex}"</p>
+    </div>`;
+  }).join("")}</div>`;
+
+  wrap.querySelectorAll(".speak-round").forEach(btn => {
+    btn.onclick = () => speak(btn.dataset.word, btn);
+  });
+}
+
+function renderAll() {
+  renderChips();
+  renderLetters();
+  renderGrid();
+}
+
+document.getElementById("lookupInput").addEventListener("keydown", e => { if (e.key === "Enter") doLookup(); });
+document.getElementById("lookupBtn").addEventListener("click", doLookup);
+document.getElementById("clearBtn").addEventListener("click", () => {
+  query = ""; letter = null; cat = "all"; renderAll();
+});
+
+function extractJson(text) {
+  const cleaned = text.replace(/```json/g, "").replace(/```/g, "").trim();
+  return JSON.parse(cleaned);
+}
+
+async function defineForKidViaAI(word) {
+  const system = `You are a children's dictionary. A 7-year-old typed in an English word to look up.
+Respond with ONLY a JSON object, no other text, no markdown fences.
+
+If it is a real English word (any part of speech, any common word, including past tense/plural forms):
+{"found": true, "word": "<word, capitalized>", "syllables": "<word split with middle dots, e.g. 'el·e·phant'>", "part_of_speech": "<noun/verb/adjective/etc>", "simple_definition": "<one short sentence, under 16 words, everyday words a 7-year-old already knows, concrete and friendly>", "simple_example": "<one short fun sentence a 7-year-old could picture, using the word naturally>"}
+
+If it is NOT a real English word (gibberish or misspelled beyond recognition):
+{"found": false, "suggestion": "<the closest real English word it might be, or null if none>"}
+
+Always respond in valid JSON only.`;
+
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: 1000,
+      system: system,
+      messages: [
+        { role: "user", content: `Word: ${word}` }
+      ]
+    })
+  });
+  if (!res.ok) throw new Error("ai unreachable");
+  const data = await res.json();
+  const text = data.content.map(b => b.text || "").join("\n");
+  return extractJson(text);
+}
+
+function cleanDefText(raw) {
+  let t = raw.split(";")[0].trim();
+  t = t.replace(/\s*\([^)]*\)\s*/g, " ").trim();
+  if (t.length > 0) t = t.charAt(0).toUpperCase() + t.slice(1);
+  if (!/[.!?]$/.test(t)) t += ".";
+  return t;
+}
+
+async function defineForKidViaDictionary(word) {
+  const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+  if (!res.ok) return { found: false, suggestion: null };
+  const data = await res.json();
+  const entry = data[0];
+  const posOrder = ["noun", "verb", "adjective", "adverb"];
+  let candidates = [];
+  entry.meanings.forEach(m => {
+    m.definitions.forEach(d => {
+      candidates.push({ pos: m.partOfSpeech, def: d.definition, example: d.example || "" });
+    });
+  });
+  candidates.sort((a, b) => {
+    const pa = posOrder.indexOf(a.pos), pb = posOrder.indexOf(b.pos);
+    const oa = pa === -1 ? 99 : pa, ob = pb === -1 ? 99 : pb;
+    if (oa !== ob) return oa - ob;
+    return a.def.length - b.def.length;
+  });
+  const best = candidates[0];
+  return {
+    found: true,
+    word: entry.word.charAt(0).toUpperCase() + entry.word.slice(1),
+    syllables: entry.word,
+    part_of_speech: best ? best.pos : "",
+    simple_definition: best ? cleanDefText(best.def) : "",
+    simple_example: best && best.example ? best.example : "",
+    fromDictionaryFallback: true
+  };
+}
+
+function renderLookupResult(result) {
+  const resultBox = document.getElementById("lookupResult");
+  let html = `<div class="entry-word-row">
+    <p class="entry-word">${result.word}</p>
+    <span class="entry-phonetic">${result.syllables}</span>
+    <button class="speak-round" id="lookupSpeak" aria-label="Hear ${result.word}">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B3A73" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+    </button>
+  </div>`;
+  if (result.part_of_speech) html += `<span class="pos-tag">${result.part_of_speech}</span>`;
+  html += `<p class="simple-def">${result.simple_definition}</p>`;
+  if (result.simple_example) html += `<p class="simple-example">"${result.simple_example}"</p>`;
+  if (result.fromDictionaryFallback) {
+    html += `<p class="grownup-note">This one's straight from the dictionary rather than simplified. If it's tricky, a grown-up can help explain it!</p>`;
+  }
+  resultBox.innerHTML = html;
+  document.getElementById("lookupSpeak").onclick = (e) => speak(result.word, e.currentTarget);
+}
+
+async function doLookup() {
+  const input = document.getElementById("lookupInput");
+  const word = input.value.trim();
+  const resultBox = document.getElementById("lookupResult");
+  if (!word) return;
+  resultBox.innerHTML = `<p class="lookup-loading">Looking that up...</p>`;
+
+  let result = null;
+  let aiWorked = false;
+  try {
+    result = await defineForKidViaAI(word);
+    aiWorked = true;
+  } catch (e) {
+    aiWorked = false;
+  }
+
+  if (!aiWorked) {
+    try {
+      result = await defineForKidViaDictionary(word);
+    } catch (e) {
+      resultBox.innerHTML = `<div class="lookup-error">Something went wrong looking that up.<br><span style="font-size:12px; opacity:.75; font-weight:600;">Details: ${(e && e.message) ? e.message : e}</span></div>`;
+      return;
+    }
+  }
+
+  if (!result.found) {
+    resultBox.innerHTML = `<div class="lookup-error">Hmm, "${word}" doesn't look like a real word.${result.suggestion ? ` Did you mean "${result.suggestion}"?` : " Check the spelling and try again!"}</div>`;
+    return;
+  }
+
+  renderLookupResult(result);
+}
+
+renderAll();
+</script>
+</body>
+</html>
